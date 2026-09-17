@@ -1,0 +1,10 @@
+{
+  "description": "Provides customers, sellers, and support teams real-time drone delivery tracking, order management, weather updates, and communication tools for efficient service.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

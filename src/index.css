@@ -1,0 +1,105 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import 'tailwindcss';
+
+/* ── Theme tokens ────────────────────────────────────────── */
+:root {
+  --g-bg:  #070b10;
+  --g-s1:  #0d1520;
+  --g-s2:  #111c2b;
+  --g-bd:  #1e2d40;
+  --g-bd2: #2e4060;
+  --g-tx:  #c8d8e8;
+  --g-tx2: #4a6080;
+  --g-tx3: #6a8aaa;
+  --g-tx4: #2e4060;
+}
+
+html.light {
+  --g-bg:  #eef3f8;
+  --g-s1:  #ffffff;
+  --g-s2:  #f0f5fb;
+  --g-bd:  #d0dce8;
+  --g-bd2: #b0c4d4;
+  --g-tx:  #0d1828;
+  --g-tx2: #4a6478;
+  --g-tx3: #6a8090;
+  --g-tx4: #94aab8;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  background-color: var(--g-bg);
+  color: var(--g-tx);
+}
+
+@theme inline {
+  --color-bg-base: #070b10;
+  --color-surface: #0d1520;
+  --color-surface-2: #111c2b;
+  --color-border: #1e2d40;
+  --color-cyan: #00d4ff;
+  --color-cyan-dim: #00a8cc;
+  --color-amber: #f59e0b;
+  --color-green: #22c55e;
+  --color-red: #ef4444;
+  --color-muted: #4a6080;
+  --color-text: #c8d8e8;
+  --color-text-dim: #6a8aaa;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-sans: 'Inter', sans-serif;
+}
+
+/* ── Theme utility classes ───────────────────────────────── */
+.g-bg  { background-color: var(--g-bg) }
+.g-s1  { background-color: var(--g-s1) }
+.g-s2  { background-color: var(--g-s2) }
+.g-tx  { color: var(--g-tx) }
+.g-tx2 { color: var(--g-tx2) }
+.g-tx3 { color: var(--g-tx3) }
+.g-tx4 { color: var(--g-tx4) }
+.g-bd  { border-color: var(--g-bd) }
+.g-bd2 { border-color: var(--g-bd2) }
+
+/* ── Scrollbars ──────────────────────────────────────────── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--g-bd) transparent;
+}
+
+*::-webkit-scrollbar { width: 4px; height: 4px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: var(--g-bd); border-radius: 2px; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  color: var(--g-tx);
+}
+
+.mono { font-family: 'JetBrains Mono', monospace; }
+
+/* ── Animations ──────────────────────────────────────────── */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+@keyframes scan-line {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(400%); }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.live-dot { animation: pulse-dot 1.5s ease-in-out infinite; }
+.cursor-blink { animation: blink 1s step-end infinite; }
+
+@keyframes ping {
+  0% { transform: scale(1); opacity: 0.7; }
+  75%, 100% { transform: scale(2); opacity: 0; }
+}

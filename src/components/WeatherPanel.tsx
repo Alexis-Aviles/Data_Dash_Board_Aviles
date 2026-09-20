@@ -3,19 +3,37 @@ interface WeatherPanelProps {
 }
 
 const HOURLY = [
-  { time: "08:00", temp: 17, wind: 12, gusts: 18, vis: 9.5, flyable: true },
-  { time: "09:00", temp: 18, wind: 14, gusts: 22, vis: 10,  flyable: true },
-  { time: "10:00", temp: 19, wind: 11, gusts: 16, vis: 10,  flyable: true },
-  { time: "11:00", temp: 20, wind: 10, gusts: 14, vis: 10,  flyable: true },
-  { time: "12:00", temp: 21, wind: 13, gusts: 19, vis: 9,   flyable: true },
+  { time: "00:00", temp: 13, wind:  7, gusts: 10, vis: 9.0, flyable: true  },
+  { time: "01:00", temp: 13, wind:  6, gusts:  9, vis: 8.5, flyable: true  },
+  { time: "02:00", temp: 12, wind:  6, gusts:  8, vis: 8.0, flyable: true  },
+  { time: "03:00", temp: 12, wind:  5, gusts:  7, vis: 7.5, flyable: true  },
+  { time: "04:00", temp: 11, wind:  5, gusts:  7, vis: 7.0, flyable: true  },
+  { time: "05:00", temp: 11, wind:  6, gusts:  8, vis: 7.5, flyable: true  },
+  { time: "06:00", temp: 12, wind:  7, gusts:  9, vis: 8.5, flyable: true  },
+  { time: "07:00", temp: 14, wind:  9, gusts: 13, vis: 9.0, flyable: true  },
+  { time: "08:00", temp: 17, wind: 12, gusts: 18, vis: 9.5, flyable: true  },
+  { time: "09:00", temp: 18, wind: 14, gusts: 22, vis: 10,  flyable: true  },
+  { time: "10:00", temp: 19, wind: 11, gusts: 16, vis: 10,  flyable: true  },
+  { time: "11:00", temp: 20, wind: 10, gusts: 14, vis: 10,  flyable: true  },
+  { time: "12:00", temp: 21, wind: 13, gusts: 19, vis: 9,   flyable: true  },
   { time: "13:00", temp: 21, wind: 18, gusts: 28, vis: 8,   flyable: false },
   { time: "14:00", temp: 20, wind: 22, gusts: 34, vis: 7,   flyable: false },
   { time: "15:00", temp: 19, wind: 19, gusts: 29, vis: 7,   flyable: false },
-  { time: "16:00", temp: 18, wind: 15, gusts: 21, vis: 8.5, flyable: true },
-  { time: "17:00", temp: 17, wind: 12, gusts: 17, vis: 9,   flyable: true },
+  { time: "16:00", temp: 18, wind: 15, gusts: 21, vis: 8.5, flyable: true  },
+  { time: "17:00", temp: 17, wind: 12, gusts: 17, vis: 9,   flyable: true  },
+  { time: "18:00", temp: 16, wind: 10, gusts: 14, vis: 9.5, flyable: true  },
+  { time: "19:00", temp: 15, wind:  9, gusts: 12, vis: 9.5, flyable: true  },
+  { time: "20:00", temp: 15, wind:  8, gusts: 11, vis: 9.0, flyable: true  },
+  { time: "21:00", temp: 14, wind:  7, gusts: 10, vis: 8.5, flyable: true  },
+  { time: "22:00", temp: 14, wind:  7, gusts:  9, vis: 8.0, flyable: true  },
+  { time: "23:00", temp: 13, wind:  6, gusts:  8, vis: 8.0, flyable: true  },
 ];
 
 export default function WeatherPanel({ accentColor = "#00d4ff" }: WeatherPanelProps) {
+  const currentHour = new Date().getHours();
+  const currentTimeStr = `${String(currentHour).padStart(2, "0")}:00`;
+  const now = HOURLY.find((h) => h.time === currentTimeStr) ?? HOURLY[HOURLY.length - 1];
+
   return (
     <div className="space-y-4">
       {/* Current conditions */}
@@ -23,10 +41,10 @@ export default function WeatherPanel({ accentColor = "#00d4ff" }: WeatherPanelPr
         <div className="font-mono text-[10px] uppercase tracking-widest mb-4" style={{ color: "var(--g-tx2)" }}>Current Conditions — Amsterdam Delivery Zone</div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: "Temperature", value: "19°C",    sub: "Feels 17°C",        icon: "🌤", ok: true },
-            { label: "Wind Speed",  value: "11 km/h", sub: "Gusts 16 km/h",     icon: "💨", ok: true },
-            { label: "Visibility",  value: "10 km",   sub: "Clear",             icon: "👁", ok: true },
-            { label: "Drone Ops",   value: "GO",       sub: "Conditions nominal", icon: "✅", ok: true },
+            { label: "Temperature", value: `${now.temp}°C`,      sub: `Feels ${now.temp - 2}°C`,       icon: "🌤", ok: true },
+            { label: "Wind Speed",  value: `${now.wind} km/h`,   sub: `Gusts ${now.gusts} km/h`,       icon: "💨", ok: now.gusts <= 25 },
+            { label: "Visibility",  value: `${now.vis} km`,      sub: now.vis >= 9 ? "Clear" : now.vis >= 7 ? "Moderate" : "Poor", icon: "👁", ok: now.vis >= 7 },
+            { label: "Drone Ops",   value: now.flyable ? "GO" : "NO-GO", sub: now.flyable ? "Conditions nominal" : "High winds / low vis", icon: now.flyable ? "✅" : "🚫", ok: now.flyable },
           ].map((c) => (
             <div key={c.label} className="text-center">
               <div className="text-2xl mb-2">{c.icon}</div>
@@ -52,7 +70,7 @@ export default function WeatherPanel({ accentColor = "#00d4ff" }: WeatherPanelPr
             </thead>
             <tbody>
               {HOURLY.map((h) => {
-                const isCurrent = h.time === "10:00";
+                const isCurrent = h.time === currentTimeStr;
                 return (
                   <tr
                     key={h.time}

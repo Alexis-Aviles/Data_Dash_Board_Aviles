@@ -63,14 +63,7 @@ export default function SupportDashboard({ onLogout }: { onLogout: () => void })
 
   return (
     <div className="min-h-full flex flex-col relative" style={{ backgroundColor: "var(--g-bg)", fontFamily: "'Inter', sans-serif" }}>
-      {/* Logo watermark */}
-      <div
-        className="fixed inset-0 pointer-events-none z-0 flex items-center justify-center overflow-hidden"
-        style={{ opacity: isDark ? 0.035 : 0.06 }}
-        aria-hidden="true"
-      >
-        <img src={logo} alt="" className="w-[60vw] max-w-2xl object-contain select-none" />
-      </div>
+
 
       <div className="relative z-10 flex flex-col flex-1">
         <DashHeader role="Support" name="Ops Center" onLogout={onLogout} accent="#a78bfa" />
@@ -82,7 +75,7 @@ export default function SupportDashboard({ onLogout }: { onLogout: () => void })
               <button
                 key={t.id}
                 onClick={() => setTab(t.id)}
-                className={`px-4 py-3 text-xs font-semibold border-b-2 whitespace-nowrap transition-colors ${
+                className={`px-4 py-3 text-sm font-semibold border-b-2 whitespace-nowrap transition-colors ${
                   tab === t.id ? "border-[#a78bfa] text-[#a78bfa]" : "border-transparent hover:opacity-80"
                 }`}
                 style={tab !== t.id ? { color: "var(--g-tx2)" } : {}}
@@ -100,7 +93,7 @@ export default function SupportDashboard({ onLogout }: { onLogout: () => void })
             <div className="max-w-4xl mx-auto space-y-4">
               <div className="flex items-center justify-between flex-wrap gap-3">
                 <div>
-                  <h2 className="font-bold text-base" style={{ color: "var(--g-tx)" }}>Support Tickets</h2>
+                  <h2 className="font-bold text-xl" style={{ color: "var(--g-tx)" }}>Support Tickets</h2>
                   <p className="text-xs mt-0.5" style={{ color: "var(--g-tx2)" }}>{tickets.filter((t) => t.status === "Open").length} open · {tickets.length} total</p>
                 </div>
                 {/* Filter pills */}
@@ -227,7 +220,7 @@ export default function SupportDashboard({ onLogout }: { onLogout: () => void })
             return (
               <div className="max-w-5xl mx-auto space-y-4">
                 <div className="flex items-center justify-between flex-wrap gap-3">
-                  <h2 className="font-bold text-base" style={{ color: "var(--g-tx)" }}>Fleet & Live Location</h2>
+                  <h2 className="font-bold text-xl" style={{ color: "var(--g-tx)" }}>Fleet & Live Location</h2>
                   <div className="flex gap-4 text-xs font-mono">
                     {[
                       { l: "In Flight",   c: "#00d4ff", s: "in_flight"   },
@@ -328,7 +321,7 @@ export default function SupportDashboard({ onLogout }: { onLogout: () => void })
           {tab === "orders" && (
             <div className="max-w-5xl mx-auto space-y-4">
               <div className="flex items-center justify-between flex-wrap gap-2">
-                <h2 className="font-bold text-base" style={{ color: "var(--g-tx)" }}>All Orders — Today</h2>
+                <h2 className="font-bold text-xl" style={{ color: "var(--g-tx)" }}>All Orders — Today</h2>
                 <div className="flex gap-4 text-xs font-mono">
                   {[
                     { l: "Active",    c: "#00d4ff", filter: (o: typeof ORDERS[0]) => ["In Flight","Preparing","Queued"].includes(o.status) },
@@ -375,7 +368,7 @@ export default function SupportDashboard({ onLogout }: { onLogout: () => void })
           {tab === "system" && (
             <div className="max-w-4xl mx-auto space-y-4">
               <div className="flex items-center justify-between">
-                <h2 className="font-bold text-base" style={{ color: "var(--g-tx)" }}>IT & System Status</h2>
+                <h2 className="font-bold text-xl" style={{ color: "var(--g-tx)" }}>IT & System Status</h2>
                 <div className="flex items-center gap-2">
                   <span className="live-dot w-1.5 h-1.5 rounded-full bg-[#f59e0b] inline-block" />
                   <span className="text-xs font-mono text-[#f59e0b]">1 Degraded · 1 Offline</span>
@@ -396,7 +389,7 @@ export default function SupportDashboard({ onLogout }: { onLogout: () => void })
                     </div>
                     <div className="text-right">
                       <p className="font-mono text-[10px] mb-0.5" style={{ color: "var(--g-tx2)" }}>Uptime</p>
-                      <p className="font-mono text-base font-bold" style={{ color: SYS_COLOR[s.status] }}>{s.uptime}</p>
+                      <p className="font-mono text-xl font-bold" style={{ color: SYS_COLOR[s.status] }}>{s.uptime}</p>
                     </div>
                   </div>
                 ))}

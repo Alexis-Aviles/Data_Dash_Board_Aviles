@@ -83,26 +83,29 @@ function AppInner() {
       </div>
 
       {/* ── LEFT — logo panel ── */}
-      <div className="relative flex flex-col items-center justify-center flex-1 p-8 md:p-16 min-h-[40vh] md:min-h-full">
+      <div className="relative flex flex-col items-center justify-center flex-1 p-8 md:p-12 min-h-[32vh] md:min-h-full">
         <div
           className="absolute inset-0 pointer-events-none"
-          style={{ background: `radial-gradient(ellipse at 50% 50%, ${accent}14 0%, transparent 70%)`, transition: "background 0.6s" }}
+          style={{ background: `radial-gradient(ellipse at 50% 50%, ${accent}12 0%, transparent 65%)`, transition: "background 0.6s" }}
         />
 
-        <div className="relative flex flex-col items-center text-center">
+        <div className="relative flex flex-col items-center text-center gap-6">
           <div
-            className="mb-8"
-            style={{ filter: `drop-shadow(0 0 48px ${accent}66)`, transition: "filter 0.6s" }}
+            style={{ filter: `drop-shadow(0 0 36px ${accent}55)`, transition: "filter 0.6s" }}
           >
-            <img src={logo} alt="Get It Drone" className="w-56 h-56 md:w-72 md:h-72 object-contain" />
+            <img src={logo} alt="Get It Drone" className="w-40 h-40 md:w-56 md:h-56 object-contain" />
           </div>
-          <div className="hidden md:flex flex-col gap-3 text-left w-full max-w-xs">
+          <div className="space-y-1">
+            <p className="text-base font-semibold tracking-wide" style={{ color: "var(--g-tx)" }}>Get It Drone</p>
+            <p className="text-sm" style={{ color: "var(--g-tx2)" }}>Instant drone delivery platform</p>
+          </div>
+          <div className="hidden md:flex flex-col gap-2.5 text-left w-full max-w-[220px]">
             {[
               { icon: "🚁", text: "Real-time drone tracking" },
               { icon: "📦", text: "Live order status updates" },
             ].map((f) => (
-              <div key={f.text} className="flex items-center gap-3 text-sm" style={{ color: "var(--g-tx2)" }}>
-                <span className="text-lg">{f.icon}</span>
+              <div key={f.text} className="flex items-center gap-2.5 text-sm" style={{ color: "var(--g-tx3)" }}>
+                <span>{f.icon}</span>
                 <span>{f.text}</span>
               </div>
             ))}
@@ -113,13 +116,13 @@ function AppInner() {
       {/* Vertical divider on desktop */}
       <div className="hidden md:block w-px self-stretch" style={{ backgroundColor: "var(--g-bd)" }} />
       {/* Horizontal divider on mobile */}
-      <div className="md:hidden h-px mx-6" style={{ backgroundColor: "var(--g-bd)" }} />
+      <div className="md:hidden h-px mx-8" style={{ backgroundColor: "var(--g-bd)" }} />
 
       {/* ── RIGHT — sign-in panel ── */}
-      <div className="relative flex flex-col justify-center w-full md:w-[420px] shrink-0 p-6 md:p-12">
+      <div className="relative flex flex-col justify-center w-full md:w-[460px] shrink-0 p-8 md:p-14">
         <div className="w-full max-w-sm mx-auto">
-          <h2 className="text-xl font-bold mb-1" style={{ color: "var(--g-tx)" }}>Sign in</h2>
-          <p className="text-sm mb-7" style={{ color: "var(--g-tx2)" }}>Choose your account type to continue</p>
+          <h2 className="text-2xl font-bold mb-1" style={{ color: "var(--g-tx)" }}>Sign in</h2>
+          <p className="text-sm mb-8" style={{ color: "var(--g-tx2)" }}>Choose your account type to continue</p>
 
           {/* Role picker */}
           <div className="grid grid-cols-3 gap-2 mb-6">

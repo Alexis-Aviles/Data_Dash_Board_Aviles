@@ -81,8 +81,8 @@ export default function DashHeader({ role, name, onLogout, accent }: DashHeaderP
       {/* Brand */}
       <div className="flex items-center gap-3">
         <div className="hidden sm:block">
-          <div className="text-xs font-bold tracking-wide" style={{ color: accent }}>Get It Drone</div>
-          <div className="font-mono text-[9px] uppercase tracking-widest" style={{ color: "var(--g-tx4)" }}>{role} Portal</div>
+          <div className="text-sm font-bold tracking-wide" style={{ color: accent }}>Get It Drone</div>
+          <div className="font-mono text-[10px] uppercase tracking-widest" style={{ color: "var(--g-tx3)" }}>{role} Portal</div>
         </div>
       </div>
 
@@ -142,7 +142,7 @@ export default function DashHeader({ role, name, onLogout, accent }: DashHeaderP
               style={{ backgroundColor: "var(--g-s1)", borderColor: "var(--g-bd)" }}
             >
               <div className="px-4 py-3 border-b flex items-center justify-between" style={{ borderColor: "var(--g-bd)" }}>
-                <span className="text-xs font-semibold" style={{ color: "var(--g-tx)" }}>Notifications</span>
+                <span className="text-sm font-semibold" style={{ color: "var(--g-tx)" }}>Notifications</span>
                 <button onClick={markAllRead} className="text-xs hover:underline" style={{ color: accent }}>
                   Mark all read
                 </button>
@@ -164,8 +164,8 @@ export default function DashHeader({ role, name, onLogout, accent }: DashHeaderP
                     >
                       <div className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 transition-colors" style={{ backgroundColor: n.read ? "var(--g-bd)" : accent }} />
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium leading-tight" style={{ color: "var(--g-tx)" }}>{n.text}</p>
-                        <p className="font-mono text-[10px] mt-0.5 truncate" style={{ color: "var(--g-tx2)" }}>{n.sub}</p>
+                        <p className="text-sm font-medium leading-snug" style={{ color: "var(--g-tx)" }}>{n.text}</p>
+                        <p className="font-mono text-xs mt-0.5 truncate" style={{ color: "var(--g-tx3)" }}>{n.sub}</p>
                       </div>
                       <span className="font-mono text-[9px] shrink-0" style={{ color: "var(--g-tx4)" }}>{n.time}</span>
                       <button
@@ -188,14 +188,14 @@ export default function DashHeader({ role, name, onLogout, accent }: DashHeaderP
 
         {/* User */}
         <div className="hidden sm:block text-right">
-          <p className="text-xs font-semibold" style={{ color: "var(--g-tx)" }}>{name}</p>
-          <p className="font-mono text-[9px]" style={{ color: "var(--g-tx2)" }}>{role}</p>
+          <p className="text-sm font-semibold" style={{ color: "var(--g-tx)" }}>{name}</p>
+          <p className="font-mono text-[10px]" style={{ color: "var(--g-tx3)" }}>{role}</p>
         </div>
 
         <button
           onClick={onLogout}
-          className="text-xs px-3 py-1.5 rounded-xl border font-medium transition-colors hover:opacity-80"
-          style={{ borderColor: "var(--g-bd)", color: "var(--g-tx2)" }}
+          className="text-sm px-3.5 py-1.5 rounded-xl border font-medium transition-colors hover:opacity-80"
+          style={{ borderColor: "var(--g-bd2)", color: "var(--g-tx)" }}
         >
           Sign out
         </button>

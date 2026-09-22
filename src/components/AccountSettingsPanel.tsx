@@ -549,3 +549,4 @@ export default function AccountSettingsPanel({ accent, initials, name, role, ini
     </div>
   );
 }
+

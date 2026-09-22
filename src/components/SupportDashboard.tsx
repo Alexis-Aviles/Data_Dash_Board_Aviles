@@ -1,4 +1,6 @@
 import { useState } from "react";
+import AccountSettingsPanel from "@/components/AccountSettingsPanel";
+import TicketThread, { STATUS_COLOR, PRIORITY_COLOR } from "@/components/TicketThread";
 import logo from "@/imports/image.png";
 import DashHeader from "@/components/DashHeader";
 import DroneMap, { type MapDrone } from "@/components/DroneMap";
@@ -10,6 +12,7 @@ const TABS = [
   { id: "fleet",    label: "🚁 Fleet & Location"  },
   { id: "orders",   label: "📦 Orders"            },
   { id: "system",   label: "🖥 IT / System"       },
+  { id: "account",  label: "👤 Account"           },
 ];
 
 const ALL_DRONES: MapDrone[] = [
@@ -30,15 +33,13 @@ const ORDERS = [
   { id: "GID-88201", customer: "Morgan Blake", seller: "TechGoods Store", status: "Failed",    drone: "DR-05", time: "08:30" },
 ];
 
-const STATUS_COLOR: Record<string, string> = {
+const ORDER_STATUS_COLOR: Record<string, string> = {
   "In Flight": "#00d4ff", Preparing: "#f59e0b", Queued: "#a78bfa",
   Delivered: "#22c55e", Failed: "#ef4444",
 };
 const DRONE_STATUS_COLOR: Record<string, string> = {
   in_flight: "#00d4ff", standby: "#22c55e", loading: "#f59e0b", maintenance: "#ef4444",
 };
-const PRIORITY_COLOR: Record<string, string> = { High: "#ef4444", Medium: "#f59e0b", Low: "#22c55e" };
-const TICKET_STATUS_COLOR: Record<string, string> = { Open: "#00d4ff", "In Review": "#f59e0b", Resolved: "#22c55e" };
 
 const SYSTEMS = [
   { name: "Drone Fleet API",      status: "Operational", latency: "12 ms",  uptime: "99.97%" },
@@ -57,9 +58,13 @@ export default function SupportDashboard({ onLogout }: { onLogout: () => void })
   const [tab, setTab] = useState("tickets");
   const [selectedDroneId, setSelectedDroneId] = useState<string>("DR-07");
   const [ticketFilter, setTicketFilter] = useState<"All" | "Open" | "In Review" | "Resolved">("All");
+  const [openItTicketId, setOpenItTicketId] = useState<string | null>(null);
   const { tickets, updateTicketStatus, updateTicketPriority } = useTickets();
 
   const visibleTickets = ticketFilter === "All" ? tickets : tickets.filter((t) => t.status === ticketFilter);
+  const openItTicket = openItTicketId ? tickets.find((t) => t.id === openItTicketId) ?? null : null;
+
+  const IT_ACCOUNT = { name: "Ops Center", email: "ops@getitdrone.com", phone: "+31 20 555 0100" };
 
   return (
     <div className="min-h-full flex flex-col relative" style={{ backgroundColor: "var(--g-bg)", fontFamily: "'Inter', sans-serif" }}>
@@ -91,124 +96,167 @@ export default function SupportDashboard({ onLogout }: { onLogout: () => void })
           {/* ══ TICKETS ══ */}
           {tab === "tickets" && (
             <div className="max-w-4xl mx-auto space-y-4">
-              <div className="flex items-center justify-between flex-wrap gap-3">
-                <div>
-                  <h2 className="font-bold text-xl" style={{ color: "var(--g-tx)" }}>Support Tickets</h2>
-                  <p className="text-xs mt-0.5" style={{ color: "var(--g-tx2)" }}>{tickets.filter((t) => t.status === "Open").length} open · {tickets.length} total</p>
-                </div>
-                {/* Filter pills */}
-                <div className="flex gap-1.5">
-                  {(["All", "Open", "In Review", "Resolved"] as const).map((f) => (
-                    <button
-                      key={f}
-                      onClick={() => setTicketFilter(f)}
-                      className="text-xs px-3 py-1.5 rounded-full border transition-colors font-medium"
-                      style={
-                        ticketFilter === f
-                          ? { borderColor: "#a78bfa", backgroundColor: "#a78bfa18", color: "#a78bfa" }
-                          : { borderColor: "var(--g-bd)", backgroundColor: "transparent", color: "var(--g-tx2)" }
-                      }
-                    >
-                      {f}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {visibleTickets.length === 0 && (
-                <div className="text-center py-16 text-sm" style={{ color: "var(--g-tx2)" }}>No tickets matching filter</div>
-              )}
-
-              <div className="space-y-3">
-                {visibleTickets.map((t) => (
-                  <div key={t.id} className="border rounded-2xl p-5 transition-colors hover:opacity-90" style={{ backgroundColor: "var(--g-s1)", borderColor: "var(--g-bd)" }}>
-                    <div className="flex items-start justify-between gap-3 mb-3">
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap mb-1">
-                          <span
-                            className="text-[10px] font-mono px-2 py-0.5 rounded border"
-                            style={{ color: t.from === "customer" ? "#00d4ff" : "#f59e0b", borderColor: (t.from === "customer" ? "#00d4ff" : "#f59e0b") + "33", backgroundColor: (t.from === "customer" ? "#00d4ff" : "#f59e0b") + "10" }}
-                          >
-                            {t.from === "customer" ? "Customer" : "Seller"}
-                          </span>
-                          <span className="font-mono text-[10px]" style={{ color: "var(--g-tx2)" }}>{t.id}</span>
-                          <span className="font-mono text-[10px]" style={{ color: "var(--g-tx2)" }}>·</span>
-                          <span className="font-mono text-[10px]" style={{ color: "var(--g-tx2)" }}>{t.time}</span>
-                        </div>
-                        <p className="text-sm font-semibold" style={{ color: "var(--g-tx)" }}>{t.type}</p>
-                        <p className="text-xs mt-0.5" style={{ color: "var(--g-tx2)" }}>From <span style={{ color: "var(--g-tx3)" }}>{t.fromName}</span> · Order <span style={{ color: "var(--g-tx3)" }}>{t.orderId}</span></p>
-                        {t.description && (
-                          <p className="text-xs mt-2 leading-relaxed" style={{ color: "var(--g-tx3)" }}>{t.description}</p>
-                        )}
-                      </div>
-                      <div className="flex flex-col items-end gap-2 shrink-0">
-                        <span
-                          className="text-[10px] font-mono px-2 py-0.5 rounded-full border"
-                          style={{ color: PRIORITY_COLOR[t.priority], borderColor: PRIORITY_COLOR[t.priority] + "44", backgroundColor: PRIORITY_COLOR[t.priority] + "10" }}
-                        >
-                          {t.priority}
-                        </span>
-                        <span
-                          className="text-[10px] font-mono px-2 py-0.5 rounded-full border"
-                          style={{ color: TICKET_STATUS_COLOR[t.status], borderColor: TICKET_STATUS_COLOR[t.status] + "44", backgroundColor: TICKET_STATUS_COLOR[t.status] + "10" }}
-                        >
-                          {t.status}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex items-center justify-between gap-3 pt-3 border-t flex-wrap" style={{ borderColor: "var(--g-s2)" }}>
-                      {/* Status actions */}
-                      <div className="flex gap-2 flex-wrap">
-                        {t.status !== "In Review" && t.status !== "Resolved" && (
-                          <button
-                            onClick={() => updateTicketStatus(t.id, "In Review")}
-                            className="text-xs px-3 py-1.5 rounded-xl border border-[#a78bfa]/30 text-[#a78bfa] hover:bg-[#a78bfa]/10 transition-colors font-medium"
-                          >
-                            Start Review
-                          </button>
-                        )}
-                        {t.status !== "Resolved" && (
-                          <button
-                            onClick={() => updateTicketStatus(t.id, "Resolved")}
-                            className="text-xs px-3 py-1.5 rounded-xl border border-[#22c55e]/30 text-[#22c55e] hover:bg-[#22c55e]/10 transition-colors font-medium"
-                          >
-                            Mark Resolved
-                          </button>
-                        )}
-                        {t.status === "Resolved" && (
-                          <button
-                            onClick={() => updateTicketStatus(t.id, "Open")}
-                            className="text-xs px-3 py-1.5 rounded-xl border transition-colors hover:opacity-80"
-                            style={{ borderColor: "var(--g-bd)", color: "var(--g-tx2)" }}
-                          >
-                            Reopen
-                          </button>
-                        )}
+              {openItTicket ? (
+                <TicketThread
+                  ticket={openItTicket}
+                  onBack={() => setOpenItTicketId(null)}
+                  viewerRole="support"
+                  viewerName="GID Support"
+                  viewerAccent="#a78bfa"
+                  viewerInitials="GID"
+                  itControls={
+                    <div className="flex flex-wrap items-center gap-4">
+                      {/* Status selector */}
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-[10px] font-mono uppercase tracking-widest shrink-0" style={{ color: "var(--g-tx2)" }}>Status:</span>
+                        {(["Open", "In Review", "Waiting for Customer", "Waiting for Seller", "Waiting for IT", "Resolved", "Closed"] as const).map((s) => {
+                          const sc = STATUS_COLOR[s];
+                          const active = openItTicket.status === s;
+                          return (
+                            <button key={s} onClick={() => updateTicketStatus(openItTicket.id, s)}
+                              className="text-[10px] font-mono px-2 py-0.5 rounded-full border transition-all hover:opacity-90"
+                              style={active
+                                ? { color: sc.text, backgroundColor: sc.bg, borderColor: sc.border }
+                                : { color: "var(--g-tx2)", backgroundColor: "transparent", borderColor: "var(--g-bd)" }
+                              }>
+                              {s}
+                            </button>
+                          );
+                        })}
                       </div>
                       {/* Priority selector */}
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <span className="text-[10px] font-mono mr-0.5" style={{ color: "var(--g-tx2)" }}>Priority:</span>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-[10px] font-mono uppercase tracking-widest" style={{ color: "var(--g-tx2)" }}>Priority:</span>
                         {(["Low", "Medium", "High"] as const).map((p) => (
-                          <button
-                            key={p}
-                            onClick={() => updateTicketPriority(t.id, p)}
-                            className="text-[10px] font-mono px-2 py-0.5 rounded-full border transition-all"
-                            style={
-                              t.priority === p
-                                ? { borderColor: PRIORITY_COLOR[p], backgroundColor: PRIORITY_COLOR[p] + "18", color: PRIORITY_COLOR[p] }
-                                : { borderColor: "var(--g-bd)", color: "var(--g-tx2)", backgroundColor: "transparent" }
-                            }
-                          >
+                          <button key={p} onClick={() => updateTicketPriority(openItTicket.id, p)}
+                            className="text-[10px] font-mono px-2 py-0.5 rounded-full border transition-all hover:opacity-90"
+                            style={openItTicket.priority === p
+                              ? { color: PRIORITY_COLOR[p], backgroundColor: PRIORITY_COLOR[p] + "18", borderColor: PRIORITY_COLOR[p] + "44" }
+                              : { color: "var(--g-tx2)", backgroundColor: "transparent", borderColor: "var(--g-bd)" }
+                            }>
                             {p}
                           </button>
                         ))}
                       </div>
                     </div>
+                  }
+                />
+              ) : (
+                <>
+                  <div className="flex items-center justify-between flex-wrap gap-3">
+                    <div>
+                      <h2 className="font-bold text-xl" style={{ color: "var(--g-tx)" }}>Support Tickets</h2>
+                      <p className="text-xs mt-0.5" style={{ color: "var(--g-tx2)" }}>
+                        {tickets.filter((t) => t.status === "Open").length} open ·{" "}
+                        {tickets.filter((t) => t.status === "Waiting for IT").length} awaiting IT ·{" "}
+                        {tickets.length} total
+                      </p>
+                    </div>
+                    <div className="flex gap-1.5 flex-wrap">
+                      {(["All", "Open", "In Review", "Resolved"] as const).map((f) => (
+                        <button key={f} onClick={() => setTicketFilter(f)}
+                          className="text-xs px-3 py-1.5 rounded-full border transition-colors font-medium"
+                          style={ticketFilter === f
+                            ? { borderColor: "#a78bfa", backgroundColor: "#a78bfa18", color: "#a78bfa" }
+                            : { borderColor: "var(--g-bd)", backgroundColor: "transparent", color: "var(--g-tx2)" }
+                          }>
+                          {f}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                ))}
-              </div>
+
+                  {visibleTickets.length === 0 && (
+                    <div className="text-center py-16 text-sm" style={{ color: "var(--g-tx2)" }}>No tickets matching filter</div>
+                  )}
+
+                  <div className="space-y-3">
+                    {visibleTickets.map((t) => {
+                      const sc = STATUS_COLOR[t.status] ?? STATUS_COLOR["Open"];
+                      return (
+                        <div key={t.id} className="border rounded-2xl p-5 transition-colors" style={{ backgroundColor: "var(--g-s1)", borderColor: t.status === "Waiting for IT" ? "#fbbf2444" : "var(--g-bd)" }}>
+                          <div className="flex items-start justify-between gap-3 mb-3">
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap mb-1">
+                                <span className="text-[10px] font-mono px-2 py-0.5 rounded border"
+                                  style={{ color: t.from === "customer" ? "#00d4ff" : "#f59e0b", borderColor: (t.from === "customer" ? "#00d4ff" : "#f59e0b") + "33", backgroundColor: (t.from === "customer" ? "#00d4ff" : "#f59e0b") + "10" }}>
+                                  {t.from === "customer" ? "Customer" : "Seller"}
+                                </span>
+                                <span className="font-mono text-[10px]" style={{ color: "var(--g-tx2)" }}>{t.id}</span>
+                                <span className="font-mono text-[10px]" style={{ color: "var(--g-tx2)" }}>· {t.time}</span>
+                              </div>
+                              <p className="text-sm font-semibold" style={{ color: "var(--g-tx)" }}>{t.type}</p>
+                              <p className="text-xs mt-0.5" style={{ color: "var(--g-tx2)" }}>
+                                From <span style={{ color: "var(--g-tx3)" }}>{t.fromName}</span> · Order{" "}
+                                <span style={{ color: "var(--g-tx3)" }}>{t.orderId}</span>
+                              </p>
+                              <p className="text-[10px] font-mono mt-1" style={{ color: "var(--g-tx3)" }}>
+                                {t.conversation.length} message{t.conversation.length !== 1 ? "s" : ""} · Updated {t.lastUpdated}
+                              </p>
+                              {t.status === "Waiting for IT" && (
+                                <p className="text-[10px] font-semibold mt-1" style={{ color: "#fbbf24" }}>⚡ User replied — response needed</p>
+                              )}
+                            </div>
+                            <div className="flex flex-col items-end gap-2 shrink-0">
+                              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full border"
+                                style={{ color: PRIORITY_COLOR[t.priority], borderColor: PRIORITY_COLOR[t.priority] + "44", backgroundColor: PRIORITY_COLOR[t.priority] + "10" }}>
+                                {t.priority}
+                              </span>
+                              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full border"
+                                style={{ color: sc.text, borderColor: sc.border, backgroundColor: sc.bg }}>
+                                {t.status}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between gap-3 pt-3 border-t flex-wrap" style={{ borderColor: "var(--g-s2)" }}>
+                            <div className="flex gap-2 flex-wrap">
+                              <button onClick={() => setOpenItTicketId(t.id)}
+                                className="text-xs px-3 py-1.5 rounded-xl border font-semibold transition-colors hover:bg-[#a78bfa]/10"
+                                style={{ borderColor: "#a78bfa44", color: "#a78bfa" }}>
+                                Open Thread
+                              </button>
+                              {t.status !== "In Review" && t.status !== "Resolved" && t.status !== "Closed" && (
+                                <button onClick={() => updateTicketStatus(t.id, "In Review")}
+                                  className="text-xs px-3 py-1.5 rounded-xl border transition-colors hover:opacity-80 font-medium"
+                                  style={{ borderColor: "var(--g-bd)", color: "var(--g-tx2)" }}>
+                                  Start Review
+                                </button>
+                              )}
+                              {t.status !== "Resolved" && t.status !== "Closed" && (
+                                <button onClick={() => updateTicketStatus(t.id, "Resolved")}
+                                  className="text-xs px-3 py-1.5 rounded-xl border border-[#22c55e]/30 text-[#22c55e] hover:bg-[#22c55e]/10 transition-colors font-medium">
+                                  Mark Resolved
+                                </button>
+                              )}
+                              {(t.status === "Resolved" || t.status === "Closed") && (
+                                <button onClick={() => updateTicketStatus(t.id, "Open")}
+                                  className="text-xs px-3 py-1.5 rounded-xl border transition-colors hover:opacity-80"
+                                  style={{ borderColor: "var(--g-bd)", color: "var(--g-tx2)" }}>
+                                  Reopen
+                                </button>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              <span className="text-[10px] font-mono mr-0.5" style={{ color: "var(--g-tx2)" }}>Priority:</span>
+                              {(["Low", "Medium", "High"] as const).map((p) => (
+                                <button key={p} onClick={() => updateTicketPriority(t.id, p)}
+                                  className="text-[10px] font-mono px-2 py-0.5 rounded-full border transition-all hover:opacity-90"
+                                  style={t.priority === p
+                                    ? { borderColor: PRIORITY_COLOR[p], backgroundColor: PRIORITY_COLOR[p] + "18", color: PRIORITY_COLOR[p] }
+                                    : { borderColor: "var(--g-bd)", color: "var(--g-tx2)", backgroundColor: "transparent" }
+                                  }>
+                                  {p}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
             </div>
           )}
 
@@ -349,7 +397,7 @@ export default function SupportDashboard({ onLogout }: { onLogout: () => void })
                           <td className="px-4 py-3 text-sm" style={{ color: "var(--g-tx)" }}>{o.customer}</td>
                           <td className="px-4 py-3 text-xs" style={{ color: "var(--g-tx3)" }}>{o.seller}</td>
                           <td className="px-4 py-3">
-                            <span className="font-mono text-[10px] px-2 py-0.5 rounded-full border" style={{ color: STATUS_COLOR[o.status], borderColor: STATUS_COLOR[o.status] + "44", backgroundColor: STATUS_COLOR[o.status] + "10" }}>
+                            <span className="font-mono text-[10px] px-2 py-0.5 rounded-full border" style={{ color: ORDER_STATUS_COLOR[o.status], borderColor: ORDER_STATUS_COLOR[o.status] + "44", backgroundColor: ORDER_STATUS_COLOR[o.status] + "10" }}>
                               {o.status}
                             </span>
                           </td>
@@ -414,6 +462,20 @@ export default function SupportDashboard({ onLogout }: { onLogout: () => void })
                   </div>
                 ))}
               </div>
+            </div>
+          )}
+
+          {tab === "account" && (
+            <div className="p-4 md:p-6">
+              <h2 className="font-bold text-xl mb-5" style={{ color: "var(--g-tx)" }}>Account Settings</h2>
+              <AccountSettingsPanel
+                accent="#a78bfa"
+                initials="OC"
+                name={IT_ACCOUNT.name}
+                role="IT / Operations account"
+                initialEmail={IT_ACCOUNT.email}
+                initialPhone={IT_ACCOUNT.phone}
+              />
             </div>
           )}
 

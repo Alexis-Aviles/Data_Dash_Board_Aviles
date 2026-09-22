@@ -1,6 +1,8 @@
 import { useState } from "react";
 import logo from "@/imports/image.png";
 import DashHeader from "@/components/DashHeader";
+import AccountSettingsPanel from "@/components/AccountSettingsPanel";
+import TicketThread from "@/components/TicketThread";
 import DroneMap from "@/components/DroneMap";
 import WeatherPanel from "@/components/WeatherPanel";
 import { useTickets } from "@/context/TicketContext";
@@ -241,6 +243,7 @@ export default function CustomerDashboard({ onLogout }: { onLogout: () => void }
   const [ticketStatusFilter, setTicketStatusFilter] = useState("All");
   const [ticketSort, setTicketSort] = useState<"newest" | "oldest">("newest");
   const [openTicketId, setOpenTicketId] = useState<string | null>(null);
+
   const [notifToggles, setNotifToggles] = useState({ drone: true, delivery: true, promos: false, summary: true });
   const [activeStat, setActiveStat] = useState<OrderStat>(null);
   const [shopStore, setShopStore] = useState<string | null>(null);
@@ -264,6 +267,8 @@ export default function CustomerDashboard({ onLogout }: { onLogout: () => void }
     "Open":                  { bg: "#00d4ff18", text: "#00d4ff", border: "#00d4ff44" },
     "In Review":             { bg: "#f59e0b18", text: "#f59e0b", border: "#f59e0b44" },
     "Waiting for Customer":  { bg: "#a78bfa18", text: "#a78bfa", border: "#a78bfa44" },
+    "Waiting for Seller":    { bg: "#fb923c18", text: "#fb923c", border: "#fb923c44" },
+    "Waiting for IT":        { bg: "#fbbf2418", text: "#fbbf24", border: "#fbbf2444" },
     "Waiting for Support":   { bg: "#fb923c18", text: "#fb923c", border: "#fb923c44" },
     "Resolved":              { bg: "#22c55e18", text: "#22c55e", border: "#22c55e44" },
     "Closed":                { bg: "var(--g-s2)",  text: "var(--g-tx3)", border: "var(--g-bd)" },
@@ -1698,7 +1703,7 @@ export default function CustomerDashboard({ onLogout }: { onLogout: () => void }
                       className="border rounded-lg px-2.5 py-1.5 text-xs font-mono focus:outline-none"
                       style={{ backgroundColor: "var(--g-s2)", borderColor: ticketStatusFilter !== "All" ? "#00d4ff88" : "var(--g-bd)", color: "var(--g-tx)", cursor: "pointer" }}
                     >
-                      {["All", "Open", "In Review", "Waiting for Customer", "Waiting for Support", "Resolved", "Closed"].map((s) => (
+                      {["All", "Open", "In Review", "Waiting for Customer", "Waiting for IT", "Resolved", "Closed"].map((s) => (
                         <option key={s}>{s}</option>
                       ))}
                     </select>
@@ -1719,48 +1724,14 @@ export default function CustomerDashboard({ onLogout }: { onLogout: () => void }
 
                 {/* Ticket detail view */}
                 {openTicket && (
-                  <div className="border rounded-2xl overflow-hidden" style={{ backgroundColor: "var(--g-s1)", borderColor: "var(--g-bd)" }}>
-                    <div className="flex items-center justify-between px-5 py-3 border-b" style={{ borderColor: "var(--g-bd)" }}>
-                      <div className="flex items-center gap-3">
-                        <button onClick={() => setOpenTicketId(null)} className="text-xs hover:opacity-70 flex items-center gap-1" style={{ color: "var(--g-tx2)" }}>← Back</button>
-                        <span className="font-mono text-xs text-[#00d4ff]">{openTicket.id}</span>
-                      </div>
-                      <span className="font-mono text-[10px] px-2 py-0.5 rounded-full border"
-                        style={{ color: TICKET_STATUS_COLOR[openTicket.status].text, backgroundColor: TICKET_STATUS_COLOR[openTicket.status].bg, borderColor: TICKET_STATUS_COLOR[openTicket.status].border }}>
-                        {openTicket.status}
-                      </span>
-                    </div>
-                    <div className="px-5 py-4 border-b space-y-1" style={{ borderColor: "var(--g-bd)" }}>
-                      <p className="font-semibold text-sm" style={{ color: "var(--g-tx)" }}>{openTicket.type}</p>
-                      <div className="flex flex-wrap gap-3 text-[10px] font-mono" style={{ color: "var(--g-tx2)" }}>
-                        <span>Order: {openTicket.orderId}</span>
-                        <span>Submitted: {openTicket.submittedDate}</span>
-                        <span>Updated: {openTicket.lastUpdated}</span>
-                        <span style={{ color: PRIORITY_COLOR[openTicket.priority] }}>Priority: {openTicket.priority}</span>
-                      </div>
-                      {openTicket.status === "Waiting for Customer" && (
-                        <p className="text-[10px] font-semibold mt-1" style={{ color: "#a78bfa" }}>⚡ Support is waiting for your response</p>
-                      )}
-                      {(openTicket.status === "Open" || openTicket.status === "In Review" || openTicket.status === "Waiting for Support") && (
-                        <p className="text-[10px] font-semibold mt-1" style={{ color: "#f59e0b" }}>⏳ Support team is reviewing your ticket</p>
-                      )}
-                    </div>
-                    <div className="px-5 py-4 space-y-3">
-                      {openTicket.conversation.map((msg, i) => (
-                        <div key={i} className={`flex gap-3 ${msg.author === "user" ? "flex-row-reverse" : ""}`}>
-                          <div className="w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-[10px] font-bold"
-                            style={{ backgroundColor: msg.author === "user" ? "#00d4ff22" : "var(--g-s2)", color: msg.author === "user" ? "#00d4ff" : "var(--g-tx2)" }}>
-                            {msg.author === "user" ? "AM" : "GID"}
-                          </div>
-                          <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 ${msg.author === "user" ? "rounded-tr-sm" : "rounded-tl-sm"}`}
-                            style={{ backgroundColor: msg.author === "user" ? "#00d4ff14" : "var(--g-s2)" }}>
-                            <p className="text-xs" style={{ color: "var(--g-tx)" }}>{msg.text}</p>
-                            <p className="text-[9px] mt-1 font-mono" style={{ color: "var(--g-tx4)" }}>{msg.time}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  <TicketThread
+                    ticket={openTicket}
+                    onBack={() => setOpenTicketId(null)}
+                    viewerRole="customer"
+                    viewerName="Alex Morgan"
+                    viewerAccent="#00d4ff"
+                    viewerInitials="AM"
+                  />
                 )}
 
                 {/* Ticket list */}
@@ -1797,7 +1768,10 @@ export default function CustomerDashboard({ onLogout }: { onLogout: () => void }
                             {t.status === "Waiting for Customer" && (
                               <span className="text-[10px] font-semibold" style={{ color: "#a78bfa" }}>Your turn to respond</span>
                             )}
-                            {(t.status === "Open" || t.status === "In Review" || t.status === "Waiting for Support") && (
+                            {t.status === "Waiting for IT" && (
+                              <span className="text-[10px] font-semibold" style={{ color: "#fbbf24" }}>IT reviewing your reply</span>
+                            )}
+                            {(t.status === "Open" || t.status === "In Review") && (
                               <span className="text-[10px] font-semibold" style={{ color: "#f59e0b" }}>Support responding</span>
                             )}
                           </div>
@@ -1812,56 +1786,45 @@ export default function CustomerDashboard({ onLogout }: { onLogout: () => void }
 
           {/* ══ ACCOUNT ══ */}
           {tab === "account" && (
-            <div className="max-w-2xl mx-auto p-4 md:p-6 space-y-4">
-              <h2 className="font-bold text-xl mb-4" style={{ color: "var(--g-tx)" }}>My Account</h2>
-              <div className="border rounded-2xl p-6" style={{ backgroundColor: "var(--g-s1)", borderColor: "var(--g-bd)" }}>
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-16 h-16 rounded-full bg-[#00d4ff]/10 border-2 border-[#00d4ff]/30 flex items-center justify-center shrink-0">
-                    <span className="text-xl font-bold text-[#00d4ff]">AM</span>
+            <div className="p-4 md:p-6">
+              <h2 className="font-bold text-xl mb-5" style={{ color: "var(--g-tx)" }}>My Account</h2>
+              <AccountSettingsPanel
+                accent="#00d4ff"
+                initials="AM"
+                name={ACCOUNT.name}
+                role={`Member since ${ACCOUNT.joined}`}
+                initialEmail={ACCOUNT.email}
+                initialPhone={ACCOUNT.phone}
+                extraSummary={
+                  <div className="hidden md:grid grid-cols-3 gap-4 text-center shrink-0">
+                    {[{ label: "Orders", value: String(ACCOUNT.totalOrders), color: "#00d4ff" }, { label: "Delivered", value: String(ACCOUNT.delivered), color: "#22c55e" }, { label: "Saved", value: "$184", color: "#f59e0b" }].map((s) => (
+                      <div key={s.label}>
+                        <p className="text-xs mb-0.5" style={{ color: "var(--g-tx2)" }}>{s.label}</p>
+                        <p className="text-base font-bold" style={{ color: s.color }}>{s.value}</p>
+                      </div>
+                    ))}
                   </div>
-                  <div>
-                    <h3 className="text-xl font-bold" style={{ color: "var(--g-tx)" }}>{ACCOUNT.name}</h3>
-                    <p className="text-xs" style={{ color: "var(--g-tx2)" }}>Member since {ACCOUNT.joined}</p>
-                    <span className="inline-block mt-1 text-xs text-[#00d4ff] bg-[#00d4ff]/10 px-2.5 py-0.5 rounded-full border border-[#00d4ff]/20">Verified ✓</span>
-                  </div>
+                }
+              />
+              {/* Notifications */}
+              <div className="max-w-2xl mx-auto mt-5">
+                <div className="border rounded-2xl p-5" style={{ backgroundColor: "var(--g-s1)", borderColor: "var(--g-bd)" }}>
+                  <p className="text-sm font-semibold mb-4" style={{ color: "var(--g-tx)" }}>Notifications</p>
+                  {([{ key: "drone", label: "Drone in-flight updates" }, { key: "delivery", label: "Delivery confirmation" }, { key: "promos", label: "Promotions & offers" }, { key: "summary", label: "Weekly summary" }] as { key: keyof typeof notifToggles; label: string }[]).map((n) => {
+                    const on = notifToggles[n.key];
+                    return (
+                      <div key={n.key} className="flex items-center justify-between py-2.5 border-b last:border-0" style={{ borderColor: "var(--g-s2)" }}>
+                        <span className="text-sm" style={{ color: "var(--g-tx3)" }}>{n.label}</span>
+                        <button onClick={() => toggleNotif(n.key)}
+                          className="w-10 h-6 rounded-full flex items-center px-1 transition-all duration-200 focus:outline-none"
+                          style={{ backgroundColor: on ? "#00d4ff33" : "var(--g-s2)", border: `1px solid ${on ? "#00d4ff55" : "var(--g-bd)"}` }}
+                          aria-pressed={on}>
+                          <div className="w-4 h-4 rounded-full transition-all duration-200" style={{ backgroundColor: on ? "#00d4ff" : "var(--g-bd2)", transform: on ? "translateX(16px)" : "translateX(0)" }} />
+                        </button>
+                      </div>
+                    );
+                  })}
                 </div>
-                <div className="space-y-3">
-                  {[{ label: "Email", value: ACCOUNT.email }, { label: "Phone", value: ACCOUNT.phone }, { label: "Address", value: ACCOUNT.address }].map((f) => (
-                    <div key={f.label} className="flex items-start justify-between">
-                      <span className="text-xs w-20 shrink-0 pt-0.5" style={{ color: "var(--g-tx2)" }}>{f.label}</span>
-                      <span className="text-sm text-right flex-1" style={{ color: "var(--g-tx)" }}>{f.value}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-5 flex gap-2">
-                  <button className="flex-1 py-2.5 rounded-xl border border-[#00d4ff]/30 text-[#00d4ff] text-sm font-semibold hover:bg-[#00d4ff]/10 transition-colors">Edit Profile</button>
-                  <button className="flex-1 py-2.5 rounded-xl border text-sm transition-colors hover:opacity-80" style={{ borderColor: "var(--g-bd)", color: "var(--g-tx2)" }}>Change Password</button>
-                </div>
-              </div>
-              <div className="grid grid-cols-3 gap-3">
-                {[{ label: "Orders", value: String(ACCOUNT.totalOrders), color: "#00d4ff" }, { label: "Delivered", value: String(ACCOUNT.delivered), color: "#22c55e" }, { label: "Saved", value: "$184", color: "#f59e0b" }].map((s) => (
-                  <div key={s.label} className="border rounded-xl p-4 text-center" style={{ backgroundColor: "var(--g-s1)", borderColor: "var(--g-bd)" }}>
-                    <p className="text-xs mb-1" style={{ color: "var(--g-tx2)" }}>{s.label}</p>
-                    <p className="text-xl font-bold" style={{ color: s.color }}>{s.value}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="border rounded-2xl p-5" style={{ backgroundColor: "var(--g-s1)", borderColor: "var(--g-bd)" }}>
-                <p className="text-sm font-semibold mb-4" style={{ color: "var(--g-tx)" }}>Notifications</p>
-                {([{ key: "drone", label: "Drone in-flight updates" }, { key: "delivery", label: "Delivery confirmation" }, { key: "promos", label: "Promotions & offers" }, { key: "summary", label: "Weekly summary" }] as { key: keyof typeof notifToggles; label: string }[]).map((n) => {
-                  const on = notifToggles[n.key];
-                  return (
-                    <div key={n.key} className="flex items-center justify-between py-2.5 border-b last:border-0" style={{ borderColor: "var(--g-s2)" }}>
-                      <span className="text-sm" style={{ color: "var(--g-tx3)" }}>{n.label}</span>
-                      <button onClick={() => toggleNotif(n.key)}
-                        className="w-10 h-6 rounded-full flex items-center px-1 transition-all duration-200 focus:outline-none"
-                        style={{ backgroundColor: on ? "#00d4ff33" : "var(--g-s2)", border: `1px solid ${on ? "#00d4ff55" : "var(--g-bd)"}` }}
-                        aria-pressed={on}>
-                        <div className="w-4 h-4 rounded-full transition-all duration-200" style={{ backgroundColor: on ? "#00d4ff" : "var(--g-bd2)", transform: on ? "translateX(16px)" : "translateX(0)" }} />
-                      </button>
-                    </div>
-                  );
-                })}
               </div>
             </div>
           )}

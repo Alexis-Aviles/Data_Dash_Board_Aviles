@@ -90,14 +90,8 @@ function AppInner() {
         />
 
         <div className="relative flex flex-col items-center text-center gap-6">
-          <div
-            style={{ filter: `drop-shadow(0 0 36px ${accent}55)`, transition: "filter 0.6s" }}
-          >
+          <div style={{ filter: `drop-shadow(0 0 36px ${accent}55)`, transition: "filter 0.6s" }}>
             <img src={logo} alt="Get It Drone" className="w-40 h-40 md:w-56 md:h-56 object-contain" />
-          </div>
-          <div className="space-y-1">
-            <p className="text-base font-semibold tracking-wide" style={{ color: "var(--g-tx)" }}>Get It Drone</p>
-            <p className="text-sm" style={{ color: "var(--g-tx2)" }}>Instant drone delivery platform</p>
           </div>
           <div className="hidden md:flex flex-col gap-2.5 text-left w-full max-w-[220px]">
             {[

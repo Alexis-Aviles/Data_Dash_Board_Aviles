@@ -11,9 +11,7 @@ export default defineConfig(({ mode }) => {
   const emitSourcemaps = mode === 'development'
 
   return {
-    base: process.env.FIGMA_PUBLIC_URL
-      ? `${process.env.FIGMA_PUBLIC_URL}/`
-      : '/Data_Dash_Board_Aviles/',
+    base: process.env.FIGMA_PUBLIC_URL ? `${process.env.FIGMA_PUBLIC_URL}/` : '/',
     build: {
       sourcemap: emitSourcemaps ? 'inline' : false,
       minify: !emitSourcemaps,
@@ -83,7 +81,7 @@ function figmaSiteConfiguration(config: FigmaSiteConfiguration): Plugin {
     return html.replace(`<!-- ${slotName} -->`, content)
   }
 
-  const title = config.title ?? "Get It Drone"
+  const title = config.title ?? "Figma Make App"
   const description = config.description ?? ''
   const favicon = config.icons?.icon ?? ''
   const socialImage = config.openGraph?.image ?? ''

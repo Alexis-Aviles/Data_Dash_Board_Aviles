@@ -1,4 +1,6 @@
 import { useState } from "react";
+import AccountSettingsPanel from "@/components/AccountSettingsPanel";
+import TicketThread from "@/components/TicketThread";
 import logo from "@/imports/image.png";
 import DashHeader from "@/components/DashHeader";
 import DroneMap, { type MapDrone } from "@/components/DroneMap";
@@ -14,6 +16,7 @@ const TABS = [
   { id: "chat",      label: "💬 Customers"         },
   { id: "analytics", label: "📊 Analytics"         },
   { id: "support",   label: "🆘 Support"           },
+  { id: "account",   label: "👤 Account"           },
 ];
 
 type SellerOrder = {
@@ -432,6 +435,8 @@ export default function SellerDashboard({ onLogout }: { onLogout: () => void }) 
     "Open":                  { bg: "#f59e0b18", text: "#f59e0b", border: "#f59e0b44" },
     "In Review":             { bg: "#fb923c18", text: "#fb923c", border: "#fb923c44" },
     "Waiting for Customer":  { bg: "#a78bfa18", text: "#a78bfa", border: "#a78bfa44" },
+    "Waiting for Seller":    { bg: "#fb923c18", text: "#fb923c", border: "#fb923c44" },
+    "Waiting for IT":        { bg: "#fbbf2418", text: "#fbbf24", border: "#fbbf2444" },
     "Waiting for Support":   { bg: "#00d4ff18", text: "#00d4ff", border: "#00d4ff44" },
     "Resolved":              { bg: "#22c55e18", text: "#22c55e", border: "#22c55e44" },
     "Closed":                { bg: "var(--g-s2)",  text: "var(--g-tx3)", border: "var(--g-bd)" },
@@ -441,6 +446,8 @@ export default function SellerDashboard({ onLogout }: { onLogout: () => void }) 
   const [sellerTicketStatusFilter, setSellerTicketStatusFilter] = useState("All");
   const [sellerTicketSort, setSellerTicketSort] = useState<"newest" | "oldest">("newest");
   const [openSellerTicketId, setOpenSellerTicketId] = useState<string | null>(null);
+
+  const SELLER_ACCOUNT = { name: "TechGoods Store", email: "seller@techgoods.nl", phone: "+31 20 555 0182" };
 
   const mySellerTickets = tickets.filter((t) => t.from === "seller" && t.fromName === "TechGoods Store");
   const visibleSellerTickets = (() => {
@@ -1404,7 +1411,7 @@ export default function SellerDashboard({ onLogout }: { onLogout: () => void }) 
                       className="border rounded-lg px-2.5 py-1.5 text-xs font-mono focus:outline-none"
                       style={{ backgroundColor: "var(--g-s2)", borderColor: sellerTicketStatusFilter !== "All" ? "#f59e0b88" : "var(--g-bd)", color: "var(--g-tx)", cursor: "pointer" }}
                     >
-                      {["All", "Open", "In Review", "Waiting for Customer", "Waiting for Support", "Resolved", "Closed"].map((s) => (
+                      {["All", "Open", "In Review", "Waiting for Seller", "Waiting for IT", "Resolved", "Closed"].map((s) => (
                         <option key={s}>{s}</option>
                       ))}
                     </select>
@@ -1425,48 +1432,14 @@ export default function SellerDashboard({ onLogout }: { onLogout: () => void }) 
 
                 {/* Ticket detail view */}
                 {openSellerTicket && (
-                  <div className="border rounded-2xl overflow-hidden" style={{ backgroundColor: "var(--g-s1)", borderColor: "var(--g-bd)" }}>
-                    <div className="flex items-center justify-between px-5 py-3 border-b" style={{ borderColor: "var(--g-bd)" }}>
-                      <div className="flex items-center gap-3">
-                        <button onClick={() => setOpenSellerTicketId(null)} className="text-xs hover:opacity-70 flex items-center gap-1" style={{ color: "var(--g-tx2)" }}>← Back</button>
-                        <span className="font-mono text-xs text-[#f59e0b]">{openSellerTicket.id}</span>
-                      </div>
-                      <span className="font-mono text-[10px] px-2 py-0.5 rounded-full border"
-                        style={{ color: SELLER_TICKET_STATUS_COLOR[openSellerTicket.status].text, backgroundColor: SELLER_TICKET_STATUS_COLOR[openSellerTicket.status].bg, borderColor: SELLER_TICKET_STATUS_COLOR[openSellerTicket.status].border }}>
-                        {openSellerTicket.status}
-                      </span>
-                    </div>
-                    <div className="px-5 py-4 border-b space-y-1" style={{ borderColor: "var(--g-bd)" }}>
-                      <p className="font-semibold text-sm" style={{ color: "var(--g-tx)" }}>{openSellerTicket.type}</p>
-                      <div className="flex flex-wrap gap-3 text-[10px] font-mono" style={{ color: "var(--g-tx2)" }}>
-                        <span>Order: {openSellerTicket.orderId}</span>
-                        <span>Submitted: {openSellerTicket.submittedDate}</span>
-                        <span>Updated: {openSellerTicket.lastUpdated}</span>
-                        <span style={{ color: SELLER_PRIORITY_COLOR[openSellerTicket.priority] }}>Priority: {openSellerTicket.priority}</span>
-                      </div>
-                      {openSellerTicket.status === "Waiting for Customer" && (
-                        <p className="text-[10px] font-semibold mt-1" style={{ color: "#a78bfa" }}>⚡ Support is waiting for your response</p>
-                      )}
-                      {(openSellerTicket.status === "Open" || openSellerTicket.status === "In Review" || openSellerTicket.status === "Waiting for Support") && (
-                        <p className="text-[10px] font-semibold mt-1" style={{ color: "#f59e0b" }}>⏳ Support team is reviewing your ticket</p>
-                      )}
-                    </div>
-                    <div className="px-5 py-4 space-y-3">
-                      {openSellerTicket.conversation.map((msg, i) => (
-                        <div key={i} className={`flex gap-3 ${msg.author === "user" ? "flex-row-reverse" : ""}`}>
-                          <div className="w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-[10px] font-bold"
-                            style={{ backgroundColor: msg.author === "user" ? "#f59e0b22" : "var(--g-s2)", color: msg.author === "user" ? "#f59e0b" : "var(--g-tx2)" }}>
-                            {msg.author === "user" ? "TG" : "GID"}
-                          </div>
-                          <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 ${msg.author === "user" ? "rounded-tr-sm" : "rounded-tl-sm"}`}
-                            style={{ backgroundColor: msg.author === "user" ? "#f59e0b14" : "var(--g-s2)" }}>
-                            <p className="text-xs" style={{ color: "var(--g-tx)" }}>{msg.text}</p>
-                            <p className="text-[9px] mt-1 font-mono" style={{ color: "var(--g-tx4)" }}>{msg.time}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  <TicketThread
+                    ticket={openSellerTicket}
+                    onBack={() => setOpenSellerTicketId(null)}
+                    viewerRole="seller"
+                    viewerName="TechGoods Store"
+                    viewerAccent="#f59e0b"
+                    viewerInitials="TG"
+                  />
                 )}
 
                 {/* Ticket list */}
@@ -1500,10 +1473,13 @@ export default function SellerDashboard({ onLogout }: { onLogout: () => void }) 
                           </div>
                           <div className="flex items-center justify-between">
                             <p className="text-[10px] font-mono" style={{ color: "var(--g-tx3)" }}>Updated {t.lastUpdated}</p>
-                            {t.status === "Waiting for Customer" && (
-                              <span className="text-[10px] font-semibold" style={{ color: "#a78bfa" }}>Your turn to respond</span>
+                            {t.status === "Waiting for Seller" && (
+                              <span className="text-[10px] font-semibold" style={{ color: "#fb923c" }}>Your turn to respond</span>
                             )}
-                            {(t.status === "Open" || t.status === "In Review" || t.status === "Waiting for Support") && (
+                            {t.status === "Waiting for IT" && (
+                              <span className="text-[10px] font-semibold" style={{ color: "#fbbf24" }}>IT reviewing your reply</span>
+                            )}
+                            {(t.status === "Open" || t.status === "In Review") && (
                               <span className="text-[10px] font-semibold" style={{ color: "#f59e0b" }}>Support responding</span>
                             )}
                           </div>
@@ -1513,6 +1489,20 @@ export default function SellerDashboard({ onLogout }: { onLogout: () => void }) 
                   </div>
                 )}
               </div>
+            </div>
+          )}
+
+          {tab === "account" && (
+            <div className="p-4 md:p-6">
+              <h2 className="font-bold text-xl mb-5" style={{ color: "var(--g-tx)" }}>Account Settings</h2>
+              <AccountSettingsPanel
+                accent="#f59e0b"
+                initials="TG"
+                name={SELLER_ACCOUNT.name}
+                role="Seller account"
+                initialEmail={SELLER_ACCOUNT.email}
+                initialPhone={SELLER_ACCOUNT.phone}
+              />
             </div>
           )}
 
